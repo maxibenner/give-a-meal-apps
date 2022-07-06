@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "give-a-meal",
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "nohoist": [],
+  "resolutions": {
+    "@types/react": "^17"
+  }
+}
