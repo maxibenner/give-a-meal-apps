@@ -4,7 +4,6 @@ import { theme } from "give-a-meal-ui/theme";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import AppLoading from "expo-app-loading";
 import { Asset } from "expo-asset";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
@@ -20,37 +19,59 @@ import Start from "./screens/Start";
 import { RoundedScreenCorners } from "give-a-meal-ui";
 import { ClaimsProvider } from "give-a-meal-sdk";
 import { NetworkProvider } from "give-a-meal-sdk";
+import * as SplashScreen from "expo-splash-screen";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   // Cache ressources >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  const [isLoaded, setIsLoaded] = React.useState(false);
-
-  let cacheRessources = async () => {
-    // List ressources
-    const images = [
-      require("./assets/splash.png"),
-      require("./assets/donation_placeholder.png"),
-    ];
-
-    // Cache images
-    const cacheImages = images.map((image) =>
-      Asset.fromModule(image).downloadAsync()
-    );
-
-    // Await images
-    return Promise.all(cacheImages);
-  };
+  const [appIsReady, setAppIsReady] = React.useState(false);
 
   React.useEffect(() => {
-    cacheRessources().then(() => setIsLoaded(true));
+    async function prepare() {
+      try {
+        // List ressources
+        const images = [
+          require("./assets/splash.png"),
+          require("./assets/donation_placeholder.png"),
+        ];
+
+        // Cache images
+        const cacheImages = images.map((image) =>
+          Asset.fromModule(image).downloadAsync()
+        );
+
+        // Await images
+        await Promise.all(cacheImages);
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        // Tell the application to render
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
   }, []);
 
+  const onLayoutRootView = React.useCallback(async () => {
+    if (appIsReady) {
+      // This tells the splash screen to hide immediately! If we call this after
+      // `setAppIsReady`, then we may see a blank screen while the app is
+      // loading its initial state and rendering its first pixels. So instead,
+      // we hide the splash screen once we know the root view has already
+      // performed layout.
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
   // Rendering >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  if (!isLoaded) {
-    return <AppLoading />;
+  if (!appIsReady) {
+    return null;
   }
 
   return (
@@ -60,7 +81,7 @@ export default function App() {
           <LocationProvider>
             <RoundedScreenCorners>
               <SafeAreaProvider>
-                <View style={styles.container}>
+                <View style={styles.container} onLayout={onLayoutRootView}>
                   <NavigationContainer>
                     <StatusBar style="dark" />
                     <Stack.Navigator

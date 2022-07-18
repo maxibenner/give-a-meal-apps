@@ -6,7 +6,7 @@ import {
   ImageBackground,
   SafeAreaView,
   StyleSheet,
-  Text,
+  Text
 } from "react-native";
 
 const Start = ({ navigation }: { navigation: any }) => {

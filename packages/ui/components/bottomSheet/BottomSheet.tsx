@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   Dimensions,
   Modal,
@@ -6,6 +7,7 @@ import {
   Text,
   View,
   Platform,
+  TouchableOpacity,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -17,13 +19,15 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { effects, textStyles, theme } from "../../theme";
 
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 /**
  *
  * @param title Title to display on modal header
  * @param active Show and hide the modal
  * @param children Content do display inside of the modal
  * @param onCloseRequest Pass a function that will be called when modal is dismissed by swiping down or tapping the background
- * @param block Prevents modal to be closed from internal interaction when set to true
+ * @param block Prevents modal to be closed from internal interaction when set to true. Might lead to problems when not blocking state change in parent.
  * @returns
  */
 export const BottomSheet = ({
@@ -43,32 +47,29 @@ export const BottomSheet = ({
 }) => {
   // Layout
   const insets = useSafeAreaInsets();
-  const [contentHeight, setContentHeight] = useState(0);
-  const [waitForAnimation, setWaitForAnimation] = useState(false);
+  const [contentHeight, setContentHeight] = useState(151);
 
-  // Show / hide sheet
+  const [visible, setVisible] = useState(false);
+
+  // Trigger animation from parent
   useEffect(() => {
-    if (active) {
-      // Activate to prevent closing of modal before hide animations are finished playing
-      setWaitForAnimation(true);
-
-      // Animate in
-      translateY.value = withSpring(-contentHeight, { mass: 0.2 });
-    } else handleCloseWithDelay();
+    if (active) animateIn();
+    else animateOut();
   }, [active, contentHeight]);
 
-  // Use this function to trigger close animation imperatively
-  const handleClose = () => {
-    !block && onCloseRequest();
+  // Use to request state change from parent
+  const requestClose = () => !block && onCloseRequest();
+
+  const animateIn = () => {
+    setVisible(true);
+    translateY.value = withSpring(-contentHeight, { mass: 0.2 });
   };
 
-  // Use this function for declarative closing
-  const handleCloseWithDelay = () => {
-    // Animate
-    translateY.value = withSpring(20, { mass: 0.2 }, () => {
-      // Allow modal to disappear
-      runOnJS(setWaitForAnimation)(false);
-    });
+  const animateOut = () => {
+    if (block) return;
+    translateY.value = withSpring(0, { mass: 0.2 }, () =>
+      runOnJS(setVisible)(false)
+    );
   };
 
   // Animation variables
@@ -81,30 +82,23 @@ export const BottomSheet = ({
       context.value = { y: translateY.value };
     })
     .onUpdate((event) => {
-      // Bottom sheet
       translateY.value = event.translationY + context.value.y;
       translateY.value = Math.max(translateY.value, -contentHeight);
     })
     .onEnd(() => {
       if (translateY.value * 2 > -contentHeight) {
-        // Prevent closing when blocking is active
         if (block) {
-          // Animate back to full open state
+          // Bounce back
           translateY.value = withSpring(-contentHeight, { mass: 0.2 });
-        } else {
-          // Animate bottom sheet to hidden state (20 instead of 0 to hide handle)
-          translateY.value = withSpring(20, { mass: 0.2 }, () => {
-            runOnJS(onCloseRequest)();
-          });
-        }
+        } else runOnJS(onCloseRequest)();
       } else {
-        // Animate back to full open state
+        // Bounce back
         translateY.value = withSpring(-contentHeight, { mass: 0.2 });
       }
     });
 
-  // TRANSFORM animatio property
-  const reanimatedSheetStyle = useAnimatedStyle(() => {
+  // TRANSFORM animation property
+  const animatedSheetStyle = useAnimatedStyle(() => {
     "worklet";
     return {
       transform: [{ translateY: translateY.value }],
@@ -112,11 +106,9 @@ export const BottomSheet = ({
   });
 
   // OPACITY animation property
-  const reanimatedBgStyle = useAnimatedStyle(() => {
+  const animatedBgOpacity = useAnimatedStyle(() => {
     "worklet";
-    const safeTranslateY = translateY.value + 1; // Add + 1 to prevent dividing by 0
-    const safeContentHeight = contentHeight + 1; // Add + 1 to prevent dividing by 0
-    const percentageMoved = -safeTranslateY / safeContentHeight;
+    const percentageMoved = (-translateY.value + 1) / (contentHeight + 1); // Add + 1 to prevent dividing by 0
 
     // Divide to go less than 100%
     const opacitySetting = percentageMoved / 2;
@@ -129,65 +121,52 @@ export const BottomSheet = ({
   // Render component
   return (
     <Modal
-      visible={active || waitForAnimation}
+      visible={active || visible}
       transparent
-      onRequestClose={handleClose}
+      onRequestClose={requestClose}
     >
       <Animated.View
-        // Only allows close on background press when fully visible
-        onTouchStart={handleClose}
-        style={[styles.background, reanimatedBgStyle]}
+        onTouchStart={requestClose}
+        style={[styles.background, animatedBgOpacity]}
       />
-      <GestureDetector gesture={gesture}>
-        <Animated.View
-          style={[styles.container, reanimatedSheetStyle]}
-          onLayout={(event) =>
-            setContentHeight(event.nativeEvent.layout.height)
-          }
+      {/* <GestureDetector gesture={gesture}> */}
+      <Animated.View
+        style={[styles.sheet, animatedSheetStyle]}
+        onLayout={(event) => setContentHeight(event.nativeEvent.layout.height)}
+      >
+        <View style={styles.headerBar}>
+          <TouchableOpacity style={styles.cancelButton} onPress={requestClose}>
+            <Ionicons name="close" size={22} color="black" />
+          </TouchableOpacity>
+          {/* <View style={styles.handle} /> */}
+          <Text style={styles.headerText}>{title || "Information"}</Text>
+        </View>
+        <View
+          style={[
+            styles.content,
+            {
+              marginBottom:
+                Platform.OS === "ios" ? insets.bottom : theme.spacing.md,
+            },
+          ]}
         >
-          <View style={styles.headerBar}>
-            <View style={styles.handle} />
-            <Text
-              style={[
-                styles.headerText,
-                {
-                  color: error
-                    ? theme.colors.text_error
-                    : theme.colors.text_primary_dark,
-                },
-              ]}
-            >
-              {title ? title : "Information"}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              styles.content,
-              {
-                marginBottom:
-                  Platform.OS === "ios" ? insets.bottom : theme.spacing.md,
-              },
-            ]}
-          >
-            {children}
-          </View>
-        </Animated.View>
-      </GestureDetector>
+          {children}
+        </View>
+      </Animated.View>
+      {/* </GestureDetector> */}
     </Modal>
   );
 };
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
+  // Modal styles are set automatically
   background: {
     position: "absolute",
     height: SCREEN_HEIGHT,
     width: "100%",
     backgroundColor: "black",
   },
-  container: {
+  sheet: {
     flex: 1,
     width: "100%",
     position: "absolute",
@@ -212,6 +191,19 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     position: "absolute",
     top: -12,
+  },
+  cancelButton: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 1.5,
+    top: theme.spacing.sm,
+    right: theme.spacing.md,
+    width: 28,
+    height: 28,
+    borderRadius: 20,
+    opacity: 0.35,
+    backgroundColor: theme.colors.element_dark_inactive,
   },
   headerText: {
     ...textStyles.label_button,
