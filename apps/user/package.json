@@ -1,6 +1,6 @@
 {
   "name": "user",
-  "version": "1.1.22",
+  "version": "1.1.23",
   "main": "index.js",
   "license": "GPL-1.0-only",
   "scripts": {

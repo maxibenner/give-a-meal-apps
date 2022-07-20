@@ -2,7 +2,7 @@
   "expo": {
     "name": "Give a Meal",
     "slug": "give-a-meal-user",
-    "version": "1.1.22",
+    "version": "1.1.23",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -13,13 +13,14 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
+      "supportsTablet": false,
       "icon": "./assets/icon.png",
-      "supportsTablet": true,
-      "bundleIdentifier": "com.fotura.giveamealuser"
+      "bundleIdentifier": "com.fotura.giveamealuser",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "We us your location to show you free meals nearby."
+      }
     },
     "android": {
       "adaptiveIcon": {
