@@ -24,7 +24,6 @@ const Start = ({ navigation }: { navigation: any }) => {
   const animatedYText = React.useRef(new Animated.Value(20)).current;
   const animatedYButton = React.useRef(new Animated.Value(20)).current;
   React.useEffect(() => {
-    alert(JSON.stringify({ message: "trest", lala: "tset2" }));
     Animated.stagger(150, [
       Animated.spring(animatedOpacityText, {
         toValue: 1,
