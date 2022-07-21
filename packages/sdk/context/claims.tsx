@@ -36,6 +36,7 @@ export function ClaimsProvider({ children }: { children: ReactNode }) {
       } else {
         const id = uuid.v4() as string;
         await AsyncStorage.setItem("CLAIM_ID", id);
+        setClaimId(id);
       }
     } catch (error) {
       console.log(error);

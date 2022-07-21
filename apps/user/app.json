@@ -2,7 +2,7 @@
   "expo": {
     "name": "Give a Meal",
     "slug": "give-a-meal-user",
-    "version": "1.1.23",
+    "version": "1.1.27",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -19,7 +19,7 @@
       "icon": "./assets/icon.png",
       "bundleIdentifier": "com.fotura.giveamealuser",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "We us your location to show you free meals nearby."
+        "NSLocationWhenInUseUsageDescription": "We use your location to show you free meals nearby."
       }
     },
     "android": {
