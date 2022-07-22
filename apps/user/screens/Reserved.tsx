@@ -123,9 +123,7 @@ export const Reserved = () => {
 
         {/* Display reservations */}
         {!loading && meals.length > 2 && (
-          <ScrollView
-            style={{  paddingVertical: theme.spacing.sm }}
-          >
+          <ScrollView>
             <FlatList
               data={meals}
               showsHorizontalScrollIndicator={false}
@@ -133,9 +131,11 @@ export const Reserved = () => {
               snapToInterval={ITEM_SIZE}
               snapToAlignment="start"
               scrollEventThrottle={16}
-              contentContainerStyle={{
-                // alignItems: "flex-start",
-              }}
+              contentContainerStyle={
+                {
+                  // alignItems: "flex-start",
+                }
+              }
               decelerationRate={Platform.OS === "ios" ? 0 : 0.98}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => {
@@ -157,6 +157,7 @@ export const Reserved = () => {
                       ]}
                       key={item.id}
                     >
+                      <View style={{ height: theme.spacing.sm }} />
                       <QRVoucher
                         style={styles.voucher}
                         // onCancel={() => handleCancel(item.id)}
@@ -167,6 +168,7 @@ export const Reserved = () => {
                         fullAddress={`${item.item_id.business_id.address}, ${item.item_id.business_id.city} ${item.item_id.business_id.country}`}
                         businessName={item.item_id.business_id.business_name}
                       />
+                      <View style={{ height: theme.spacing.sm }} />
                     </Animated.View>
                   );
                 }
