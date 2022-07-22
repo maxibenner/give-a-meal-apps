@@ -1,13 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { openMapsWithAddress } from "give-a-meal-sdk";
 import React, { useState } from "react";
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle
-} from "react-native";
+import { Dimensions, StyleSheet, Text, View, ViewStyle } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { textStyles, theme } from "../../theme";
 import { Button } from "../button/Buttons";
@@ -169,14 +163,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.text_primary_light,
   },
   expiryCounter: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    top: theme.spacing.sm,
-    left: theme.spacing.sm,
+    marginLeft: -theme.spacing.xs,
+    marginRight: "auto",
     paddingHorizontal: theme.spacing.sm,
-    width: "auto",
-    height: 20,
     borderRadius: 20,
     opacity: 0.6,
     backgroundColor: theme.colors.text_primary_light,

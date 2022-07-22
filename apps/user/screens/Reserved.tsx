@@ -1,13 +1,18 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { ClaimsContext, NetworkContext, subscribeToDonations } from "give-a-meal-sdk";
+import {
+  ClaimsContext,
+  NetworkContext,
+  subscribeToDonations,
+} from "give-a-meal-sdk";
 import { ActivityIndicatorText, BottomSheet, QRVoucher } from "give-a-meal-ui";
 import { textStyles, theme } from "give-a-meal-ui/theme";
 import { useFocusEffect } from "@react-navigation/native";
 import React, {
-  useCallback, useContext,
+  useCallback,
+  useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import {
   Animated,
@@ -19,8 +24,9 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 const { width } = Dimensions.get("window");
 
@@ -117,50 +123,56 @@ export const Reserved = () => {
 
         {/* Display reservations */}
         {!loading && meals.length > 2 && (
-          <FlatList
-            data={meals}
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            snapToInterval={ITEM_SIZE}
-            snapToAlignment="start"
-            scrollEventThrottle={16}
-            contentContainerStyle={{ alignItems: "center" }}
-            decelerationRate={Platform.OS === "ios" ? 0 : 0.98}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              if (typeof item.id === "string") {
-                // Placeholders
-                return (
-                  <View key={item.id} style={{ width: EMPTY_ITEM_SIZE }} />
-                );
-              } else {
-                // Voucher
-                return (
-                  <Animated.View
-                    style={[
-                      styles.voucherContainer,
-                      {
-                        opacity: opacity,
-                        transform: [{ translateY: translateY }],
-                      },
-                    ]}
-                    key={item.id}
-                  >
-                    <QRVoucher
-                      style={styles.voucher}
-                      // onCancel={() => handleCancel(item.id)}
-                      updatedAt={item.updated_at}
-                      title={item.item_id.title}
-                      donationId={item.id}
-                      address={`${item.item_id.business_id.address}, ${item.item_id.business_id.city}`}
-                      fullAddress={`${item.item_id.business_id.address}, ${item.item_id.business_id.city} ${item.item_id.business_id.country}`}
-                      businessName={item.item_id.business_id.business_name}
-                    />
-                  </Animated.View>
-                );
-              }
-            }}
-          />
+          <ScrollView
+            style={{  paddingVertical: theme.spacing.sm }}
+          >
+            <FlatList
+              data={meals}
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              snapToInterval={ITEM_SIZE}
+              snapToAlignment="start"
+              scrollEventThrottle={16}
+              contentContainerStyle={{
+                // alignItems: "flex-start",
+              }}
+              decelerationRate={Platform.OS === "ios" ? 0 : 0.98}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => {
+                if (typeof item.id === "string") {
+                  // Placeholders
+                  return (
+                    <View key={item.id} style={{ width: EMPTY_ITEM_SIZE }} />
+                  );
+                } else {
+                  // Voucher
+                  return (
+                    <Animated.View
+                      style={[
+                        styles.voucherContainer,
+                        {
+                          opacity: opacity,
+                          transform: [{ translateY: translateY }],
+                        },
+                      ]}
+                      key={item.id}
+                    >
+                      <QRVoucher
+                        style={styles.voucher}
+                        // onCancel={() => handleCancel(item.id)}
+                        updatedAt={item.updated_at}
+                        title={item.item_id.title}
+                        donationId={item.id}
+                        address={`${item.item_id.business_id.address}, ${item.item_id.business_id.city}`}
+                        fullAddress={`${item.item_id.business_id.address}, ${item.item_id.business_id.city} ${item.item_id.business_id.country}`}
+                        businessName={item.item_id.business_id.business_name}
+                      />
+                    </Animated.View>
+                  );
+                }
+              }}
+            />
+          </ScrollView>
         )}
 
         {/* No reservations */}

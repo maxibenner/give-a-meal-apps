@@ -62,18 +62,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   counterBG: {
-    width: 70,
-    height: 70,
+    minWidth: 70,
+    minHeight: 70,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.text_link,
+    paddingVertical: 15,
+    paddingHorizontal: 6
   },
   counter: {
     ...textStyles.header_3,
+    lineHeight: 23,
     color: theme.colors.text_primary_light,
   },
   counterSub: {
     ...textStyles.body_sub,
+    lineHeight: 13,
     opacity: 1,
     color: theme.colors.text_primary_light,
   },
